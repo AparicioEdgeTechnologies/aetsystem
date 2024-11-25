@@ -1,0 +1,94 @@
+// prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          Role      @default(USER)
+  organization  Organization? @relation(fields: [orgId], references: [id])
+  orgId         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  subscriptions Subscription[]
+  scanResults   ScanResult[]
+}
+
+model Organization {
+  id            String    @id @default(cuid())
+  name          String
+  domain        String?
+  users         User[]
+  subscription  Subscription?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Subscription {
+  id              String    @id @default(cuid())
+  organization    Organization @relation(fields: [orgId], references: [id])
+  orgId           String    @unique
+  plan            Plan      @default(FREE)
+  status          SubStatus @default(ACTIVE)
+  startDate       DateTime  @default(now())
+  endDate         DateTime?
+  stripeCustomerId String?
+  stripePriceId   String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model ScanResult {
+  id          String    @id @default(cuid())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
+  type        ScanType
+  status      ScanStatus
+  results     Json
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum Plan {
+  FREE
+  BASIC
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum SubStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum ScanType {
+  VULNERABILITY
+  NETWORK
+  APPLICATION
+  CONFIGURATION
+}
+
+enum ScanStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
