@@ -1,0 +1,209 @@
+import React, { useState } from 'react';
+import { Shield, Lock, Cpu, Activity, BarChart2, Users, 
+  Bell, Search, Menu, X, ChevronDown, Settings, LogOut } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+export default function Dashboard() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activePage, setActivePage] = useState('overview');
+
+  const metrics = [
+    {
+      title: "Nivel de Seguridad",
+      value: "99.9%",
+      trend: "+0.5%",
+      status: "optimal",
+      icon: Shield
+    },
+    {
+      title: "Amenazas Detectadas",
+      value: "1,284",
+      trend: "-12%",
+      status: "good",
+      icon: Lock
+    },
+    {
+      title: "Rendimiento Sistema",
+      value: "98.5%",
+      trend: "+1.2%",
+      status: "optimal",
+      icon: Activity
+    },
+    {
+      title: "Optimización IA",
+      value: "95.8%",
+      trend: "+2.1%",
+      status: "improving",
+      icon: Cpu
+    }
+  ];
+
+  const navigationItems = [
+    { name: 'Vista General', icon: BarChart2, id: 'overview' },
+    { name: 'Seguridad', icon: Shield, id: 'security' },
+    { name: 'Monitoreo', icon: Activity, id: 'monitoring' },
+    { name: 'Escaneos', icon: Search, id: 'scans' },
+    { name: 'Usuarios', icon: Users, id: 'users' },
+    { name: 'Configuración', icon: Settings, id: 'settings' }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      {/* Sidebar */}
+      <aside className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="h-full px-3 py-4 overflow-y-auto bg-gray-800">
+          <div className="flex items-center mb-6 px-2">
+            <Shield className="h-8 w-8 text-purple-500" />
+            <span className="ml-3 text-xl font-bold text-white">AET Platform</span>
+          </div>
+
+          <nav className="space-y-2">
+            {navigationItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActivePage(item.id)}
+                className={`flex items-center w-full p-2 rounded-lg ${
+                  activePage === item.id 
+                    ? 'bg-purple-600 text-white' 
+                    : 'text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <item.icon className="w-5 h-5 mr-3" />
+                {item.name}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className={`p-4 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
+        {/* Top Bar */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+          >
+            {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon">
+              <Bell className="w-5 h-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <img 
+                src="/api/placeholder/32/32"
+                alt="User"
+                className="w-8 h-8 rounded-full"
+              />
+              <ChevronDown className="w-4 h-4 text-gray-500" />
+            </div>
+          </div>
+        </div>
+
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          {metrics.map((metric) => (
+            <Card key={metric.title}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {metric.title}
+                </CardTitle>
+                <metric.icon className={`w-4 h-4 ${
+                  metric.status === 'optimal' ? 'text-green-500' :
+                  metric.status === 'good' ? 'text-blue-500' :
+                  'text-yellow-500'
+                }`} />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{metric.value}</div>
+                <p className={`text-xs ${
+                  metric.trend.startsWith('+') ? 'text-green-500' : 'text-red-500'
+                }`}>
+                  {metric.trend} desde último mes
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Security Overview */}
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Estado de Seguridad</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Alert>
+                <Shield className="w-4 h-4" />
+                <AlertDescription>
+                  Sistema funcionando de manera óptima. Último escaneo completado hace 5 minutos.
+                </AlertDescription>
+              </Alert>
+              <div className="mt-4 space-y-2">
+                {[
+                  { name: 'Firewall', status: 'Activo', color: 'text-green-500' },
+                  { name: 'IDS/IPS', status: 'Monitoreando', color: 'text-green-500' },
+                  { name: 'Encriptación', status: '256-bit AES', color: 'text-blue-500' },
+                  { name: 'SSL/TLS', status: 'v1.3', color: 'text-blue-500' }
+                ].map((item) => (
+                  <div key={item.name} className="flex justify-between items-center">
+                    <span className="text-gray-600 dark:text-gray-400">{item.name}</span>
+                    <span className={item.color}>{item.status}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Actividad Reciente</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[
+                  {
+                    event: 'Amenaza Bloqueada',
+                    detail: 'Intento de acceso no autorizado',
+                    time: 'Hace 2 min',
+                    icon: Shield,
+                    color: 'text-red-500'
+                  },
+                  {
+                    event: 'Escaneo Completado',
+                    detail: 'Escaneo de vulnerabilidades programado',
+                    time: 'Hace 5 min',
+                    icon: Search,
+                    color: 'text-green-500'
+                  },
+                  {
+                    event: 'Sistema Actualizado',
+                    detail: 'Actualización de seguridad aplicada',
+                    time: 'Hace 15 min',
+                    icon: Activity,
+                    color: 'text-blue-500'
+                  }
+                ].map((activity, index) => (
+                  <div key={index} className="flex items-center gap-4">
+                    <activity.icon className={`w-8 h-8 ${activity.color}`} />
+                    <div className="flex-1">
+                      <h4 className="font-medium">{activity.event}</h4>
+                      <p className="text-sm text-gray-500">{activity.detail}</p>
+                    </div>
+                    <span className="text-sm text-gray-400">{activity.time}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
