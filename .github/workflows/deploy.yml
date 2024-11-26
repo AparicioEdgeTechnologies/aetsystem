@@ -45,7 +45,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ AKIATX3PIGCXKX7UCWWP }}
+          aws-access-key-id: ${{ 257394487470 }}
           aws-secret-access-key: ${{ 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 }}
           aws-region: us-east-1
       - run: pulumi up --yes
