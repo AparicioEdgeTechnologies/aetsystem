@@ -1,0 +1,34 @@
+aparicio-edge-technologies/
+├── packages/
+│   ├── core/                    # Componentes compartidos
+│   ├── ui/                      # Biblioteca de UI
+│   └── utils/                   # Utilidades comunes
+├── apps/
+│   ├── aeg-shield/             # Firewall inteligente
+│   ├── aeg-vault/              # Gestión de datos
+│   ├── aeg-guard/              # Control de acceso
+│   ├── aeg-scanner/            # Análisis de vulnerabilidades
+│   ├── aeg-monitor/            # Monitorización
+│   ├── aeg-compliance/         # Cumplimiento
+│   ├── aeg-intel/              # Inteligencia amenazas
+│   ├── aeg-train/              # Capacitación
+│   ├── aeg-response/           # Respuesta incidentes
+│   ├── aeg-cloud/              # Seguridad cloud
+│   ├── aeg-devsecops/         # Seguridad desarrollo
+│   ├── aeg-mobile/            # Seguridad móvil
+│   ├── aeg-iot/               # Seguridad IoT
+│   ├── aeg-privacy/           # Privacidad datos
+│   ├── aeg-network/           # IA para redes
+│   ├── aeg-email/             # Seguridad correo
+│   ├── aeg-asset/             # Gestión activos
+│   ├── aeg-zero-trust/        # Zero Trust
+│   ├── aeg-dlp/               # Prevención pérdida datos
+│   └── aeg-quantum/           # Seguridad cuántica
+├── platform/
+│   ├── admin/                 # Panel administración
+│   ├── client/                # Portal cliente
+│   └── api/                   # API central
+└── infrastructure/
+    ├── docker/                # Configuración Docker
+    ├── k8s/                   # Kubernetes
+    └── terraform/             # IaC

@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #1a56db;
+  --secondary: #4f46e5;
+  --accent: #7c3aed;
+}
+
+body {
+  @apply bg-gray-50;
+}
