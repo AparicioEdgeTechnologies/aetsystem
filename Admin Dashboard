@@ -1,0 +1,289 @@
+import React, { useState, useEffect } from 'react';
+import { Shield, Lock, AlertCircle, Activity, Users, Settings, 
+  Search, CreditCard, ChevronRight, Bell, Database } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+export default function AdminDashboard() {
+  const [activeView, setActiveView] = useState('overview');
+  const [systemMetrics, setSystemMetrics] = useState(null);
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Stats para el overview
+  const stats = [
+    {
+      title: "Usuarios Activos",
+      value: "1,234",
+      change: "+12.3%",
+      icon: Users,
+      color: "text-blue-500"
+    },
+    {
+      title: "Escaneos Realizados",
+      value: "856",
+      change: "+23.5%",
+      icon: Search,
+      color: "text-purple-500"
+    },
+    {
+      title: "Amenazas Detectadas",
+      value: "142",
+      change: "-8.4%",
+      icon: Shield,
+      color: "text-green-500"
+    },
+    {
+      title: "Ingresos Mensuales",
+      value: "$45.8K",
+      change: "+15.2%",
+      icon: CreditCard,
+      color: "text-yellow-500"
+    }
+  ];
+
+  useEffect(() => {
+    const initializeDashboard = async () => {
+      try {
+        // Cargar datos iniciales
+        await Promise.all([
+          fetchSystemMetrics(),
+          fetchAlerts(),
+          fetchUserStats(),
+          fetchSecurityMetrics()
+        ]);
+        
+        // Iniciar WebSocket para actualizaciones en tiempo real
+        initializeRealTimeUpdates();
+      } catch (error) {
+        console.error('Error initializing dashboard:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeDashboard();
+  }, []);
+
+  const initializeRealTimeUpdates = () => {
+    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}/admin`);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      
+      switch (data.type) {
+        case 'metrics':
+          setSystemMetrics(data.metrics);
+          break;
+        case 'alert':
+          setAlerts(prev => [data.alert, ...prev]);
+          break;
+      }
+    };
+
+    return () => ws.close();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <aside className="fixed left-0 top-0 w-64 h-full bg-white shadow-lg">
+        <div className="p-6">
+          <div className="flex items-center space-x-3 mb-8">
+            <Shield className="w-8 h-8 text-purple-500" />
+            <div>
+              <h1 className="text-xl font-bold">AET Admin</h1>
+              <p className="text-xs text-gray-500">Panel de Control</p>
+            </div>
+          </div>
+
+          <nav className="space-y-2">
+            {[
+              { id: 'overview', name: 'Vista General', icon: Activity },
+              { id: 'security', name: 'Seguridad', icon: Shield },
+              { id: 'users', name: 'Usuarios', icon: Users },
+              { id: 'scans', name: 'Escaneos', icon: Search },
+              { id: 'billing', name: 'Facturación', icon: CreditCard },
+              { id: 'settings', name: 'Configuración', icon: Settings }
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveView(item.id)}
+                className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${
+                  activeView === item.id
+                    ? 'bg-purple-50 text-purple-700'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.name}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="ml-64 p-8">
+        {/* Top Bar */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Panel de Control</h1>
+            <p className="text-gray-500">Gestione su plataforma de seguridad</p>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <button className="p-2 rounded-lg hover:bg-gray-100">
+              <Bell className="w-5 h-5 text-gray-600" />
+            </button>
+            <div className="flex items-center space-x-3">
+              <img
+                src="/api/placeholder/32/32"
+                alt="Admin"
+                className="w-8 h-8 rounded-full"
+              />
+              <div className="text-sm">
+                <p className="font-medium">Admin User</p>
+                <p className="text-gray-500">admin@aparicioedge.tech</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat) => (
+            <Card key={stat.title}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 text-sm">{stat.title}</p>
+                    <h3 className="text-2xl font-bold mt-1">{stat.value}</h3>
+                  </div>
+                  <stat.icon className={`w-8 h-8 ${stat.color}`} />
+                </div>
+                <div className={`mt-2 text-sm ${
+                  stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {stat.change} desde el último mes
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Active Security Issues */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <AlertCircle className="w-5 h-5 text-red-500" />
+              <span>Problemas de Seguridad Activos</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {alerts.slice(0, 5).map((alert) => (
+                <Alert
+                  key={alert.id}
+                  className={`${
+                    alert.severity === 'critical' ? 'bg-red-50 border-red-200' :
+                    alert.severity === 'high' ? 'bg-orange-50 border-orange-200' :
+                    'bg-yellow-50 border-yellow-200'
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium">{alert.title}</h4>
+                      <AlertDescription>{alert.description}</AlertDescription>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      Revisar <ChevronRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </div>
+                </Alert>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Activity & System Health */}
+        <div className="grid md:grid-cols-2 gap-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Actividad Reciente</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[
+                  {
+                    action: "Nuevo usuario registrado",
+                    details: "empresa.com",
+                    time: "Hace 5 min",
+                    icon: Users
+                  },
+                  {
+                    action: "Escaneo completado",
+                    details: "192.168.1.1",
+                    time: "Hace 12 min",
+                    icon: Search
+                  },
+                  {
+                    action: "Actualización del sistema",
+                    details: "v2.1.4 instalada",
+                    time: "Hace 25 min",
+                    icon: Database
+                  }
+                ].map((activity, index) => (
+                  <div key={index} className="flex items-center space-x-4">
+                    <div className="bg-purple-50 p-2 rounded-lg">
+                      <activity.icon className="w-5 h-5 text-purple-500" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{activity.action}</p>
+                      <p className="text-sm text-gray-500">{activity.details}</p>
+                    </div>
+                    <span className="text-sm text-gray-500">{activity.time}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Estado del Sistema</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[
+                  { name: 'API Gateway', status: 'Operativo', uptime: '99.99%' },
+                  { name: 'Base de Datos', status: 'Operativo', uptime: '99.95%' },
+                  { name: 'Scanner Service', status: 'Operativo', uptime: '99.90%' },
+                  { name: 'Monitor Service', status: 'Operativo', uptime: '100%' }
+                ].map((service) => (
+                  <div key={service.name} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{service.name}</p>
+                      <p className="text-sm text-gray-500">Uptime: {service.uptime}</p>
+                    </div>
+                    <span className="px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm">
+                      {service.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  );
+}
